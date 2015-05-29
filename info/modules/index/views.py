@@ -40,7 +40,7 @@ def index():
         "user": user.to_dict() if user else None,
         "news_dict_li": news_dict_li
     }
-    return render_template("index.html", data=data)
+    return render_template("news/index.html", data=data)
 
 
 @index_blu.route('/favicon.ico')
