@@ -39,6 +39,7 @@ def index():
     data = {
         "user": user.to_dict() if user else None,
         "news_dict_li": news_dict_li
+        # TODO 需要查询category返回给前端  category_li
     }
     return render_template("news/index.html", data=data)
 
