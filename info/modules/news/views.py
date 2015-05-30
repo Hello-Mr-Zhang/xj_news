@@ -1,4 +1,4 @@
-from flask import render_template, current_app, session, g
+from flask import render_template, current_app, session, g, abort
 
 from info import constants
 from info.models import News, User
@@ -27,9 +27,21 @@ def news_detail(news_id):
     # 遍历对象列表，将对象的字典添加到字典列表中
     for news in news_list:
         news_dict_li.append(news.to_basic_dict())
+
+    news = None
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+    if not news:
+        # TODO 404错误页面，后期处理
+        abort(404)
+    # 更新新闻点击次数
+    news.clicks += 1
     data = {
         "news_dict_li": news_dict_li,
-        "user": user.to_dict() if user else None
+        "user": user.to_dict() if user else None,
+        "news": news.to_dict()
     }
 
     return render_template("news/detail.html", data=data)
