@@ -43,10 +43,10 @@ $(function () {
 
         if ((canScrollHeight - nowScroll) < 100) {
             // 判断页数，去更新新闻数据
-            if(!data_querying){
+            if (!data_querying) {
                 data_querying = true;
                 // 如果当前页数小于总页数， 才去加载数据
-                if(cur_page < total_page){
+                if (cur_page < total_page) {
                     cur_page += 1;
                     //加载数据
                     updateNewsData();
@@ -64,22 +64,22 @@ function updateNewsData() {
     }
     $.get("/news_list", params, function (response) {
         data_querying = false
-        if(response.errno == "0"){
+        if (response.errno == "0") {
             // 给总页数赋值
             total_page = response.data.total_page
             // 请求成功
             // 清除已有代码
-            if(cur_page == 1){
+            if (cur_page == 1) {
                 $('.list_con').html("");
             }
 
             // 添加请求出来的数据
-            for (var i=0;i<response.data.news_dict_li.length;i++) {
+            for (var i = 0; i < response.data.news_dict_li.length; i++) {
                 var news = response.data.news_dict_li[i]
                 var content = '<li>'
-                content += '<a href="/news/'+news.id+'" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
-                content += '<a href="/news/'+news.id+'" class="news_title fl">' + news.title + '</a>'
-                content += '<a href="/news/'+news.id+'" class="news_detail fl">' + news.digest + '</a>'
+                content += '<a href="/news/' + news.id + '" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
+                content += '<a href="/news/' + news.id + '" class="news_title fl">' + news.title + '</a>'
+                content += '<a href="/news/' + news.id + '" class="news_detail fl">' + news.digest + '</a>'
                 content += '<div class="author_info fl">'
                 content += '<div class="source fl">来源：' + news.source + '</div>'
                 content += '<div class="time fl">' + news.create_time + '</div>'
@@ -87,7 +87,7 @@ function updateNewsData() {
                 content += '</li>'
                 $(".list_con").append(content)
             }
-        }else{
+        } else {
             // 请求失败
             alert(response.errmsg)
         }
