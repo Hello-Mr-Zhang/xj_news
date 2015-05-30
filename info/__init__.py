@@ -9,7 +9,7 @@ from flask.ext.wtf.csrf import generate_csrf
 from redis import StrictRedis
 
 from config import config
-from info.utils.common import do_index_class
+
 
 db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
@@ -44,7 +44,7 @@ def create_app(config_name):
 
     # 开启csrf保护,已经做了校验功能
     CSRFProtect(app)
-
+    from info.utils.common import do_index_class
     app.add_template_filter(do_index_class, "index_class")
 
     @app.after_request
