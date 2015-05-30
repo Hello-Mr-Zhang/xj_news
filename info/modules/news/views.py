@@ -40,6 +40,9 @@ def news_detail(news_id):
     news.clicks += 1
 
     is_collected = False
+    if user:
+        if news in user.collection_news:
+            is_collected = True
 
     data = {
         "news_dict_li": news_dict_li,
