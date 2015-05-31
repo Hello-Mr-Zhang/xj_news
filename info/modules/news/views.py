@@ -44,12 +44,22 @@ def news_detail(news_id):
     if user:
         if news in user.collection_news:
             is_collected = True
+    # 查询评论数据
+    comments = []
+    try:
+        comments = Comment.query.filter(Comment.news_id==news_id).order_by(Comment.create_time.desc()).all()
+    except Exception as e:
+        current_app.logger.error(e)
 
+    comment_dict_li =[]
+    for comment in comments:
+        comment_dict_li.append(comment.to_dict())
     data = {
         "news_dict_li": news_dict_li,
         "user": user.to_dict() if user else None,
         "news": news.to_dict(),
-        "is_collected": is_collected
+        "is_collected": is_collected,
+        "comments":comment_dict_li
     }
 
     return render_template("news/detail.html", data=data)
