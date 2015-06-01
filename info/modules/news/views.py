@@ -144,7 +144,7 @@ def comment_news():
     return jsonify(errno=RET.OK, errmsg="OK", comment=comment.to_dict())
 
 
-@news_blu.route('/news_like', methods=["POST"])
+@news_blu.route('/comment_like', methods=["POST"])
 @user_login_data
 def news_like():
     user = g.user
@@ -187,7 +187,8 @@ def news_like():
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                       CommentLike.comment_id == comment.id)
         if comment_like_model:
-            comment_like_model.delete()
+            db.session.delete(comment_like_model)
+            comment.like_count -= 1
     try:
         db.session.commit()
     except Exception as e:
