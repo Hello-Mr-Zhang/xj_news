@@ -50,10 +50,26 @@ def news_detail(news_id):
         comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
+    comment_like_ids=[]
+    if g.user:
+        try:
+            # 查询当前用户在当前新闻里都点赞了哪些评论
+            # 1.查询当前新闻所有评论，取到所有评论id
+            comment_ids = [comment.id for comment in comments]
+            # 2.查询当前页哪些评论被当前用户点赞，查询comment_id在第一步的评论id列表内的所有数据
+            comment_likes = CommentLike.query.filter(CommentLike.comment_id.in_(comment_ids), CommentLike.user_id==g.user.id).all()
+            # 3.第二部查询的是一个点赞列表
+            comment_like_ids = [comment_like.comment_id for comment_like in comment_likes]
+        except Exception as e:
+            current_app.logger.error(e)
 
     comment_dict_li = []
     for comment in comments:
-        comment_dict_li.append(comment.to_dict())
+        comment_dict = comment.to_dict()
+        comment_dict["is_like"] = False
+        if comment.id in comment_like_ids:
+            comment_dict["is_like"] = True
+        comment_dict_li.append(comment_dict)
     data = {
         "news_dict_li": news_dict_li,
         "user": user.to_dict() if user else None,
@@ -187,7 +203,7 @@ def news_like():
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                       CommentLike.comment_id == comment.id)
         if comment_like_model:
-            db.session.delete(comment_like_model)
+            comment_like_model.delete()
             comment.like_count -= 1
     try:
         db.session.commit()
