@@ -1,7 +1,7 @@
 from flask import render_template, current_app, session, g, abort, request, jsonify
 
 from info import constants, db
-from info.models import News, User, Comment
+from info.models import News, User, Comment, CommentLike
 from info.modules.news import news_blu
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
@@ -47,11 +47,11 @@ def news_detail(news_id):
     # 查询评论数据
     comments = []
     try:
-        comments = Comment.query.filter(Comment.news_id==news_id).order_by(Comment.create_time.desc()).all()
+        comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
 
-    comment_dict_li =[]
+    comment_dict_li = []
     for comment in comments:
         comment_dict_li.append(comment.to_dict())
     data = {
@@ -59,7 +59,7 @@ def news_detail(news_id):
         "user": user.to_dict() if user else None,
         "news": news.to_dict(),
         "is_collected": is_collected,
-        "comments":comment_dict_li
+        "comments": comment_dict_li
     }
 
     return render_template("news/detail.html", data=data)
@@ -142,3 +142,56 @@ def comment_news():
         current_app.logger.error(e)
         db.session.rollback()
     return jsonify(errno=RET.OK, errmsg="OK", comment=comment.to_dict())
+
+
+@news_blu.route('/news_like', methods=["POST"])
+@user_login_data
+def news_like():
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+    # 1.获取请求参数
+    comment_id = request.json.get("comment_id")
+    news_id = request.json.get("news_id")
+    action = request.json.get('action')
+    if not all([comment_id, news_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    if action not in ["add", "remove"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    try:
+        comment_id = int(comment_id)
+        news_id = int(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    try:
+        comment = Comment.query.get(comment_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+    if not comment:
+        return jsonify(errno=RET.NODATA, errmsg="评论不存在")
+    # 点赞
+    if action == "add":
+        comment_like_model = CommentLike()
+        comment_like_model.user_id = user.id
+        comment_like_model.comment_id = comment.id
+        try:
+            db.session.add(comment_like_model)
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            db.session.rollback()
+    # 取消点赞
+    else:
+        comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
+                                                      CommentLike.comment_id == comment.id)
+        if comment_like_model:
+            comment_like_model.delete()
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg="数据库操作失败")
+    return jsonify(errno=RET.OK, errmsg="OK")

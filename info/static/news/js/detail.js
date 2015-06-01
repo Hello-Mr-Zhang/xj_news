@@ -123,6 +123,7 @@ $(function(){
                     $('.comment_sub').blur();
                     // 清空输入框内容
                     $(".comment_input").val("")
+                    updateCommentCount();
                 }else {
                     alert(resp.errmsg)
                 }
@@ -219,6 +220,7 @@ $(function(){
                         // 请空输入框
                         $this.prev().val('')
                         // 关闭
+                        updateCommentCount();
                         $this.parent().hide()
                     }else {
                         alert(resp.errmsg)
@@ -238,3 +240,8 @@ $(function(){
 
     })
 })
+
+function updateCommentCount() {
+    var count = $('.comment_list').length
+    $(".comment_count").html(count+"条评论")
+}
