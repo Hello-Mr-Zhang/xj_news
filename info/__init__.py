@@ -60,6 +60,8 @@ def create_app(config_name):
     app.register_blueprint(passport_blu)
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
 
     # 设置session保存位置
     Session(app)
