@@ -153,7 +153,7 @@ def login():
     # 3.校验密码是否正确
     # user = User.query.filter(User.nick_name == mobile, User.password_hash == password).first()
     try:
-        user = User.query.filter(User.nick_name == mobile).first()
+        user = User.query.filter(User.mobile == mobile).first()
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
