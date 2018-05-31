@@ -17,7 +17,7 @@
         <a href="#" class="logo fl"><img src="../static/news/images/logo.png" alt="logo"></a>
         {% block categoryBlock %}
             <ul class="menu fl">
-                // TODO category_li未在后台给出
+{#                 TODO category_li未在后台给出#}
                 {% for category in data.category_li %}
                     {% if loop.index == 1 %}
                         <li data-cid="{{ category.id }}" class="active"><a href="javascript:;">{{ category.name }}</a></li>
