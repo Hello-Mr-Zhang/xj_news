@@ -188,6 +188,8 @@ def news_like():
     if not comment:
         return jsonify(errno=RET.NODATA, errmsg="评论不存在")
     # 点赞
+    comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
+                                                  CommentLike.comment_id == comment.id).first()
     if action == "add":
         comment_like_model = CommentLike()
         comment_like_model.user_id = user.id
@@ -195,15 +197,14 @@ def news_like():
         try:
             db.session.add(comment_like_model)
             db.session.commit()
+            comment.like_count += 1
         except Exception as e:
             current_app.logger.error(e)
             db.session.rollback()
     # 取消点赞
     else:
-        comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
-                                                      CommentLike.comment_id == comment.id)
         if comment_like_model:
-            comment_like_model.delete()
+            db.session.delete(comment_like_model)
             comment.like_count -= 1
     try:
         db.session.commit()
